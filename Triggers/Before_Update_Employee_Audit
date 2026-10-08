@@ -1,0 +1,57 @@
+-- Write a BEFORE UPDATE trigger on the employee table
+-- that automatically stores the updated employee's details
+-- in the emp_audit1 table.
+
+-- Drop the audit table if it already exists
+-- This is useful while practicing and recreating the table
+DROP TABLE IF EXISTS emp_audit1;
+
+-- Create the employee audit table
+CREATE TABLE emp_audit1(
+    sno INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    empno INT NOT NULL,
+    ename VARCHAR(50) NOT NULL,
+    dept_id INT,
+    salary DOUBLE NOT NULL,
+    updatedon DATE,
+    remarks VARCHAR(100)
+);
+
+
+-- Drop the trigger if it already exists
+-- This prevents "Trigger already exists" error
+DROP TRIGGER IF EXISTS before_emp_update;
+
+-- Change the delimiter temporarily
+DELIMITER $$
+
+-- Create BEFORE UPDATE trigger
+CREATE TRIGGER before_emp_update
+BEFORE UPDATE ON employee
+FOR EACH ROW
+BEGIN
+
+    -- Store the updated employee details
+    -- NEW refers to the new values of the employee
+    INSERT INTO emp_audit1(empno, ename, salary)
+    VALUES(
+        NEW.Employee_Id,
+        NEW.Employee_name,
+        NEW.salary
+    );
+END $$
+
+-- Restore the default delimiter
+DELIMITER ;
+
+-- Display the audit records
+SELECT * FROM emp_audit1;
+
+-- Update an employee record
+-- This will automatically fire the BEFORE UPDATE trigger
+UPDATE employee
+SET salary = 75000
+WHERE Employee_Id = 7;
+
+-- Display the audit records
+SELECT * FROM emp_audit1;
